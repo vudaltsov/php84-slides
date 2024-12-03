@@ -67,7 +67,7 @@
             padding: 0 !important;
             margin: 0 !important;
         }
-        .reveal .present + .slide-number {
+        .reveal .present ~ .slide-number {
             display: none !important;
         }
         .rfc {
@@ -101,9 +101,9 @@
             </div>
         </section>
 
-        <div class="slide-number"></div>
-
         <section data-background-image="released.png" data-background-size="contain" data-background-color="#485381"></section>
+
+        <div class="slide-number"></div>
 
         <section data-background-image="page.png" data-background-size="contain">
             <p><a href="https://wiki.php.net/rfc/property-hooks" class="rfc">Property hooks</a></p>
@@ -689,7 +689,7 @@
                             public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyGhost(
-                                    function (Report $report): void {
+                                    initializer: function (Report $report): void {
                                         $report->__construct($this->loadData());
                                     }
                                 );
@@ -747,7 +747,7 @@
                             public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyProxy(
-                                    $this->analytics->buildReport(...)
+                                    factory: $this->analytics->buildReport(...)
                                 );
                             }
                         }
@@ -769,7 +769,7 @@
                             public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyGhost(
-                                    function (Report $report): void {
+                                    initializer: function (Report $report): void {
                                         $report->__construct($this->loadData());
                                     }
                                 );
@@ -788,13 +788,98 @@
                             public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyProxy(
-                                    $this->analytics->buildReport(...)
+                                    factory: $this->analytics->buildReport(...)
                                 );
                             }
                         }
                     </code>
                 </pre>
             </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <p><a href="https://wiki.php.net/rfc/support_object_type_in_bcmath" class="rfc">Support object type in BCMath</a></p>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <pre style="font-size: 0.8em;">
+                    <code class="language-php" data-trim data-line-numbers>
+                        namespace BCMath;
+
+                        final readonly class Number
+                        {
+                            public string $value;
+                            public int $scale;
+                        }
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <pre style="font-size: 0.6em;">
+                    <code class="language-php" data-trim data-line-numbers>
+                        // value: 3.341, scale: 6
+                        var_dump(
+                            new Number('1.23') + new Number('2.111'),
+                        );
+
+                        // value: 3.341000, scale: 10
+                        var_dump(
+                            new Number('1.23')->add(new Number('2.111'), scale: 6),
+                        );
+
+                        // value: 3.3, scale: 1
+                        var_dump(
+                            new Number('1.23')->add(new Number('2.111'), scale: 1),
+                        );
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <h3>Пора обновляться!</h3>
+            <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <pre style="margin-bottom: 40px;">
+                    <code class="language-shell" data-trim>
+                        composer why-not php '^8.4'
+                    </code>
+                </pre>
+                <img src="why-not.png" alt="">
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <h3>А если пока не получится...</h3>
+            <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <pre style="margin-bottom: 40px;">
+                    <code class="language-shell" data-trim>
+                        composer require symfony/polyfill-php84
+                    </code>
+                </pre>
+                <ul style="font-size: 0.8em;">
+                    <li><code>mb_ucfirst</code>, <code>mb_lcfirst</code></li>
+                    <li><code>array_find</code>, <code>array_find_key</code>, <code>array_any</code>, <code>array_all</code></li>
+                    <li><code>#[Deprecated]</code></li>
+                    <li><code>CURL_HTTP_VERSION_3</code>, <code>CURL_HTTP_VERSION_3ONLY</code></li>
+                </ul>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <h3>Что почитать/посмотреть</h3>
+            <ul style="font-size: 0.8em">
+                <li><a href="https://www.php.net/releases/8.4/ru.php">[php.net] Анонс релиза на сайте PHP 8.4</a></li>
+                <li><a href="https://www.php.net/manual/ru/migration84.php">[php.net] Миграция с PHP 8.3.x на PHP 8.4.x</a></li>
+                <li><a href="https://sergeymukhin.com/blog/cto-novogo-v-php-84">[sergeymukhin.com] Что нового в PHP 8.4</a></li>
+                <li><a href="https://www.youtube.com/watch?v=UgNAvNmAizk">[CutCode] PHP 8.4: Обзор ключевых нововведений с экспертами</a></li>
+                <li><a href="https://php.watch/versions/8.4">[PHP.Watch] PHP 8.4: What's New and Changed</a></li>
+                <li><a href="https://stitcher.io/blog/new-in-php-84">[stitcher.io] What's new in PHP 8.4</a></li>
+                <li><a href="https://www.youtube.com/watch?v=1AL2oDt9q38">[PHP Annotated] Celebrating the PHP 8.4 release!</a></li>
+            </ul>
         </section>
 
         <section data-background-color="black">
