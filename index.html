@@ -14,9 +14,13 @@
             --r-heading-font: "Montserrat", 'Noto Color Emoji', sans-serif;
             --r-code-font: 'Montserrat Mono', 'Noto Color Emoji', monospace;
             --r-block-margin: 10px;
+            --r-link-color: #4F5B93;
+            --r-link-color-hover: #AE508D;
+            --r-heading2-size: 2.6em;
+            --r-heading-font-weight: 500;
         }
         .reveal pre {
-            font-size: .60em;
+            font-size: .50em;
         }
         .nohighlight {
             padding: 1em !important;
@@ -66,6 +70,21 @@
         .reveal .present + .slide-number {
             display: none !important;
         }
+        .rfc {
+            font-size: 1.3em;
+        }
+        .rfc:before {
+            content: 'RFC';
+            background: var(--r-link-color);
+            border-radius: 8px;
+            color: white;
+            padding: 6px 10px;
+            margin-right: 0.4em;
+            font-size: 0.8em;
+        }
+        .rfc:hover:before {
+            background: var(--r-link-color-hover);
+        }
     </style>
     <title>PHP 8.4: живее всех живых!</title>
 </head>
@@ -84,170 +103,444 @@
 
         <div class="slide-number"></div>
 
+        <section data-background-image="released.png" data-background-size="cover"></section>
+
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Свойства</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/property-hooks">Property hooks</a></li>
-                <li><a href="https://wiki.php.net/rfc/asymmetric-visibility-v2">Asymmetric visibility</a></li>
-            </ul>
+            <h2>Свойства</h2>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Синтаксис</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/new_without_parentheses">new without parentheses</a></li>
-            </ul>
+            <p><a href="https://wiki.php.net/rfc/property-hooks" class="rfc">Property hooks</a></p>
+            <p><a href="https://wiki.php.net/rfc/asymmetric-visibility-v2" class="rfc">Asymmetric visibility</a></p>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>JIT</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/jit-ir">JIT IR</a></li>
-                <li><a href="https://wiki.php.net/rfc/jit_config_defaults">Change how JIT is disabled by default</a></li>
-            </ul>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        namespace Photoshop;
+
+                        function brighten(string $color, float $amount): string
+                        {
+                            // ...
+                        }
+
+                        $blue = '#4F5B93';
+
+                        echo brighten($blue, 1.2);
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>DOM</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/domdocument_html5_parser">DOM\Document,XMLDocument,HTMLDocument</a></li>
-                <li><a href="https://wiki.php.net/rfc/dom_additions_84">DOM\Element</a></li>
-                <li><a href="https://wiki.php.net/rfc/opt_in_dom_spec_compliance">Opt-in DOM spec-compliance</a></li>
-            </ul>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class Color
+                        {
+                            public static function fromHex(string $hex): self
+                            {
+                                return new self($hex);
+                            }
+
+                            var string $hex;
+
+                            private function __construct(string $hex)
+                            {
+                                $this->hex = $hex;
+                            }
+
+                            public function brighten(float $amount): self
+                            {
+                                // ...
+                            }
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->hex;
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Multibyte</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/mb_trim">mb_trim(), mb_ltrim(), mb_rtrim()</a></li>
-                <li><a href="https://wiki.php.net/rfc/mb_ucfirst">mb_ucfirst(), mb_lcfirst()</a></li>
-            </ul>
+            <h4>PHP 7.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        /**
+                         * @property-read string $hex
+                         */
+                        final class Color
+                        {
+                            private string $hex;
+
+                            public function __isset(string $name): bool
+                            {
+                                return $name === 'hex';
+                            }
+
+                            public function __get(string $name)
+                            {
+                                if ($name === 'hex') {
+                                    return $this->hex;
+                                }
+
+                                throw new PropertyDoesNotExist(self::class, $name);
+                            }
+
+                            // ...
+                        }
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Array</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/array_find">array_find(), array_find_key(), array_any(), array_all()</a></li>
-            </ul>
+            <h4>PHP 7.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        /**
+                         * @property-read string $hex
+                         */
+                        final class Color
+                        {
+                            private string $hex;
+
+                            public function __isset(string $name): bool {}
+
+                            public function __get(string $name) {}
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->hex;
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Date</h3>
-            <ul>
-                <li><a href="https://php.watch/versions/8.4/datetime-createFromTimestamp">DateTimeImmutable::createFromTimestamp()</a></li>
-                <li><a href="https://php.watch/versions/8.4/datetime-createFromTimestamp">New DateTime(Immutable)::get/setMicrosecond</a></li>
-            </ul>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class Color
+                        {
+                            /**
+                             * @psalm-readonly-allow-private-mutation
+                             */
+                            public string $hex;
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->hex;
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Numbers</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/new_rounding_modes_to_round_function">Add 4 new rounding modes to round() function</a></li>
-                <li><a href="https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number">Raising zero to the power of negative number</a></li>
-                <li><a href="https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum">RoundingMode enum</a></li>
-            </ul>
+            <h4>PHP 7.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class Color
+                        {
+                            private string $hex;
+
+                            public function getHex(): string
+                            {
+                                return $this->hex;
+                            }
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->getHex();
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>BCMath</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/support_object_type_in_bcmath">BCMath\Number</a></li>
-                <li><a href="https://wiki.php.net/rfc/adding_bcround_bcfloor_bcceil_to_bcmath">bcround(), bcfloor(), bcceil()</a></li>
-            </ul>
+            <h4>PHP 8.3</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class Color
+                        {
+                            private function __construct(
+                                public string $hex,
+                            ) {}
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->hex;
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>HTTP</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/rfc1867-non-post">request_parse_body()</a></li>
-                <li><a href="https://wiki.php.net/rfc/http-last-response-headers">http_(get|clear)_last_response_headers()</a></li>
-            </ul>
+            <h4>PHP 8.3</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class Color
+                        {
+                            private function __construct(
+                                private int $red,
+                                private int $green,
+                                private int $blue,
+                            ) {}
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->hex; ❌
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Reflection</h3>
-            <ul>
-                <li><a href="https://github.com/php/php-src/pull/13669">ReflectionConstant</a></li>
-                <li><a href="https://wiki.php.net/rfc/deprecated_attribute">#[Deprecated]</a></li>
-            </ul>
+            <h4>PHP 8.3</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class Color
+                        {
+                            public string $hex;
+
+                            private function __construct(
+                                private int $red,
+                                private int $green,
+                                private int $blue,
+                            ) {
+                                $this->hex = sprintf('#%X%X%X', $red, $green, $blue);
+                            }
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->hex;
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Enums in Core</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum">RoundingMode</a></li>
-                <li>PropertyHookType</li>
-                <li>Dom\AdjacentPosition</li>
-                <li>Pcntl\QosClass</li>
-                <li>Random\IntervalBoundary</li>
-            </ul>
+            <h4>PHP 8.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class Color
+                        {
+                            private function __construct(
+                                private readonly int $red,
+                                private readonly int $green,
+                                private readonly int $blue,
+                            ) {}
+
+                            public string $hex {
+                                get => sprintf('#%X%X%X', $this->red, $this->green, $this->blue);
+                            }
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        echo $blue->brighten(1.2)->hex;
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>PDO</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/pdo_driver_specific_subclasses">PDO driver specific sub-classes</a></li>
-                <li><a href="https://wiki.php.net/rfc/pdo_driver_specific_parsers">PDO Driver specific SQL parsers</a></li>
-            </ul>
+            <h4>PHP 8.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class Color
+                        {
+                            private function __construct(
+                                private readonly int $red,
+                                private readonly int $green,
+                                private readonly int $blue,
+                            ) {}
+
+                            public string $hex {
+                                get => sprintf('#%X%X%X', $this->red, $this->green, $this->blue);
+                            }
+
+                            // ...
+                        }
+
+                        $blue = Color::fromHex('#4F5B93');
+
+                        // ❌ Fatal error: Property Photoshop\Color::$hex is read-only
+                        $blue->hex = 'сломайся';
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>exit()</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/exit-as-function">exit()</a></li>
-            </ul>
+            <h4>PHP 8.3</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class PageViewed {}
+
+                        final class PageViewsProjection
+                        {
+                            /**
+                             * @psalm-readonly-allow-private-mutation
+                             */
+                            public int $views = 0;
+
+                            public function onPageViewed(PageViewed $event): void
+                            {
+                                ++$this->views;
+                            }
+                        }
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Security</h3>
-            <ul>
-                <li><a href="https://wiki.php.net/rfc/bcrypt_cost_2023">Increasing the default BCrypt cost</a></li>
-                <li><a href="https://wiki.php.net/rfc/deprecate-get-post-sessions">Deprecate GET/POST sessions</a></li>
-            </ul>
+            <h4>PHP 8.3</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class PageViewsProjection
+                        {
+                            /**
+                             * @psalm-readonly-allow-private-mutation
+                             */
+                            public int $views = 0;
+
+                            public function onPageViewed(PageViewed $event): void
+                            {
+                                ++$this->views;
+                            }
+                        }
+
+                        $projection = new PageViewsProjection();
+                        $projection->onPageViewed(new PageViewed());
+                        $projection->onPageViewed(new PageViewed());
+                        $projection->views += 100_000;
+
+                        echo $projection->views; // 100_002
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <ul style="font-size: 0.4em;">
-                <li><a href="https://wiki.php.net/rfc/property-hooks">Property hooks</a></li>
-                <li><a href="https://wiki.php.net/rfc/asymmetric-visibility-v2">Asymmetric visibility</a></li>
-                <li><a href="https://wiki.php.net/rfc/new_without_parentheses">new without parentheses</a></li>
-                <li><a href="https://wiki.php.net/rfc/jit-ir">JIT IR</a></li>
-                <li><a href="https://wiki.php.net/rfc/jit_config_defaults">Change how JIT is disabled by default</a></li>
-                <li><a href="https://wiki.php.net/rfc/deprecate-implicitly-nullable-types">Implicit nullable types</a></li>
-                <li><a href="https://wiki.php.net/rfc/domdocument_html5_parser">DOM\Document,XMLDocument,HTMLDocument</a></li>
-                <li><a href="https://wiki.php.net/rfc/dom_additions_84">DOM\Element</a></li>
-                <li><a href="https://wiki.php.net/rfc/array_find">array_find(), array_find_key(), array_any(), array_all()</a></li>
-                <li><a href="https://php.watch/versions/8.4/datetime-createFromTimestamp">DateTimeImmutable::createFromTimestamp()</a></li>
-                <li><a href="https://wiki.php.net/rfc/mb_trim">mb_trim(), mb_ltrim(), mb_rtrim()</a></li>
-                <li><a href="https://wiki.php.net/rfc/mb_ucfirst">mb_ucfirst(), mb_lcfirst()</a></li>
-                <li><a href="https://wiki.php.net/rfc/support_object_type_in_bcmath">BCMath\Number</a></li>
-                <li><a href="https://wiki.php.net/rfc/adding_bcround_bcfloor_bcceil_to_bcmath">bcround(), bcfloor(), bcceil()</a></li>
-                <li><a href="https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum">enum RoundingMode</a></li>
-                <li><a href="https://wiki.php.net/rfc/rfc1867-non-post">request_parse_body()</a></li>
-                <li><a href="https://wiki.php.net/rfc/http-last-response-headers">http_(get|clear)_last_response_headers()</a></li>
-                <li><a href="https://wiki.php.net/rfc/deprecate-get-post-sessions">Deprecate GET/POST sessions</a></li>
-                <li><a href="https://wiki.php.net/rfc/deprecated_attribute">#[Deprecated]</a></li>
-                <li><a href="https://github.com/php/php-src/pull/13669">ReflectionConstant</a></li>
-                <li><a href="https://wiki.php.net/rfc/exit-as-function">exit()</a></li>
-                <li><a href="https://wiki.php.net/rfc/bcrypt_cost_2023">Increasing the default BCrypt cost</a></li>
-                <li><a href="https://wiki.php.net/rfc/pdo_driver_specific_subclasses">PDO driver specific sub-classes</a></li>
-                <li><a href="https://wiki.php.net/rfc/pdo_driver_specific_parsers">PDO Driver specific SQL parsers</a></li>
-                <li><a href="https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number">Raising zero to the power of negative number</a></li>
-            </ul>
+            <h4>PHP 8.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class PageViewsProjection
+                        {
+                            public private(set) int $views = 0;
+
+                            public function on(PageViewed $event): void
+                            {
+                                ++$this->views;
+                            }
+                        }
+
+                        $projection = new PageViewsProjection();
+
+                        // ❌ Cannot modify private(set) property from global scope
+                        $projection->views += 100_000;
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h2>Идеи</h2>
-            <ul>
-                <li>Обратим внимание на слона в комнате!</li>
-                <li>Сравнить кол-во RFC для последних версий</li>
-                <li>Сравнить кол-во изменений для последних версий</li>
-                <li>Начать фичи с "Raising zero to the power of negative number"</li>
-            </ul>
+            <h4>PHP 8.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        interface PageStatistics
+                        {
+                            public int $views { get; }
+                        }
+                    </code>
+                </pre>
+            </div>
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
-            <h3>Спасибо!</h3>
+            <h4>PHP 8.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        interface PageStatistics
+                        {
+                            public int $views { get; }
+                        }
+
+                        final class PageViewsProjection implements PageStatistics
+                        {
+                            public private(set) int $views = 0;
+
+                            public function on(PageViewed $event): void
+                            {
+                                ++$this->views;
+                            }
+                        }
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <h4>PHP 8.4</h4>
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        interface PageStatistics
+                        {
+                            public int $views { get; }
+                        }
+
+                        final readonly class PredeterminedPageStatistics implements PageStatistics
+                        {
+                            public function __construct(
+                                public int $views,
+                            ) {}
+                        }
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-color="black">
+            <img src="last.png" alt="" style="margin: 0; width: 100%;">
         </section>
     </div>
 </div>
