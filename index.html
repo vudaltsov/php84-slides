@@ -103,7 +103,7 @@
 
         <div class="slide-number"></div>
 
-        <section data-background-image="released.png" data-background-size="cover"></section>
+        <section data-background-image="released.png" data-background-size="contain" data-background-color="#485381"></section>
 
         <section data-background-image="page.png" data-background-size="contain">
             <p><a href="https://wiki.php.net/rfc/property-hooks" class="rfc">Property hooks</a></p>
@@ -222,6 +222,7 @@
         </section>
 
         <section data-background-image="page.png" data-background-size="contain">
+            <h4>PHP 7.4</h4>
             <div style="display: flex; align-items: center; justify-content: center;">
                 <pre>
                     <code class="language-php" data-trim data-line-numbers>
@@ -517,6 +518,13 @@
                         {
                             public int $views { get; }
                         }
+
+                        function controller(PageStatistics $statistics): string
+                        {
+                            return json_encode([
+                                'views' => $statistics->views,
+                            ]);
+                        }
                     </code>
                 </pre>
             </div>
@@ -561,6 +569,223 @@
                             public function __construct(
                                 public int $views,
                             ) {}
+                        }
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <p><a href="https://wiki.php.net/rfc/lazy-objects" class="rfc">Lazy Objects</a></p>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class Report
+                        {
+                            public function __construct(
+                                public array $data,
+                            ) {}
+                        }
+
+                        final class Analytics
+                        {
+                            public function report(): Report
+                            {
+                                return new Report($this->loadData());
+                            }
+
+                            private function loadData(): array
+                            {
+                                // тяжёлые запросы
+                                sleep(10);
+
+                                return ['data'];
+                            }
+                        }
+
+                        $report = new Analytics()->report(); // ожидание 10 секунд
+                        var_dump($report->data);
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        interface Report
+                        {
+                            public array $data { get; }
+                        }
+
+                        final class LazyReport implements Report
+                        {
+                            public function __construct(
+                                private readonly Closure $loader,
+                            ) {}
+
+                            public private(set) array $data {
+                                get => $this->data ??= ($this->loader)();
+                                set => $value;
+                            }
+                        }
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class LazyReport implements Report
+                        {
+                            public function __construct(
+                                private readonly Closure $loader,
+                            ) {}
+
+                            public private(set) array $data {
+                                get => $this->data ??= ($this->loader)();
+                                set => $value;
+                            }
+                        }
+
+                        final class Analytics
+                        {
+                            public function report(): Report
+                            {
+                                return new LazyReport($this->loadData(...));
+                            }
+
+                            // ...
+                        }
+
+                        $report = new Analytics()->report();
+
+                        var_dump($report->data); // ожидание 10 секунд
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class Report
+                        {
+                            public function __construct(
+                                public array $data,
+                            ) {}
+                        }
+
+                        final class Analytics
+                        {
+                            public function report(): Report
+                            {
+                                return new ReflectionClass(Report::class)->newLazyGhost(
+                                    function (Report $report): void {
+                                        $report->__construct($this->loadData());
+                                    }
+                                );
+                            }
+
+                            // ...
+                        }
+
+                        $report = new Analytics()->report();
+
+                        var_dump($report->data); // ожидание 10 секунд
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        interface Analytics
+                        {
+                            public function report(): Report;
+                        }
+
+                        final readonly class DefaultAnalytics implements Analytics
+                        {
+                            public function report(): Report
+                            {
+                                // тяжёлые запросы
+                                sleep(10);
+
+                                return new Report(['data']);
+                            }
+                        }
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class LazyAnalytics implements Analytics
+                        {
+                            public function __construct(
+                                private Analytics $analytics,
+                            ) {}
+
+                            public function report(): Report
+                            {
+                                return new ReflectionClass(Report::class)->newLazyProxy(
+                                    $this->analytics->report(...)
+                                );
+                            }
+                        }
+
+                        $report = new LazyAnalytics(new DefaultAnalytics())->report();
+
+                        var_dump($report->data); // ожидание 10 секунд
+                    </code>
+                </pre>
+            </div>
+        </section>
+
+        <section data-background-image="page.png" data-background-size="contain">
+            <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final class Analytics
+                        {
+                            public function report(): Report
+                            {
+                                return new ReflectionClass(Report::class)->newLazyGhost(
+                                    function (Report $report): void {
+                                        $report->__construct($this->loadData());
+                                    }
+                                );
+                            }
+                        }
+                    </code>
+                </pre>
+                <pre>
+                    <code class="language-php" data-trim data-line-numbers>
+                        final readonly class LazyAnalytics implements Analytics
+                        {
+                            public function __construct(
+                                private Analytics $analytics,
+                            ) {}
+
+                            public function report(): Report
+                            {
+                                return new ReflectionClass(Report::class)->newLazyProxy(
+                                    $this->analytics->report(...)
+                                );
+                            }
                         }
                     </code>
                 </pre>
