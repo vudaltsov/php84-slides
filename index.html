@@ -592,7 +592,7 @@
 
                         final class Analytics
                         {
-                            public function report(): Report
+                            public function buildReport(): Report
                             {
                                 return new Report($this->loadData());
                             }
@@ -606,7 +606,8 @@
                             }
                         }
 
-                        $report = new Analytics()->report(); // ожидание 10 секунд
+                        $report = new Analytics()->buildReport(); // ожидание 10 секунд
+
                         var_dump($report->data);
                     </code>
                 </pre>
@@ -656,7 +657,7 @@
 
                         final class Analytics
                         {
-                            public function report(): Report
+                            public function buildReport(): Report
                             {
                                 return new LazyReport($this->loadData(...));
                             }
@@ -664,7 +665,7 @@
                             // ...
                         }
 
-                        $report = new Analytics()->report();
+                        $report = new Analytics()->buildReport();
 
                         var_dump($report->data); // ожидание 10 секунд
                     </code>
@@ -685,7 +686,7 @@
 
                         final class Analytics
                         {
-                            public function report(): Report
+                            public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyGhost(
                                     function (Report $report): void {
@@ -697,7 +698,7 @@
                             // ...
                         }
 
-                        $report = new Analytics()->report();
+                        $report = new Analytics()->buildReport();
 
                         var_dump($report->data); // ожидание 10 секунд
                     </code>
@@ -711,12 +712,12 @@
                     <code class="language-php" data-trim data-line-numbers>
                         interface Analytics
                         {
-                            public function report(): Report;
+                            public function buildReport(): Report;
                         }
 
-                        final readonly class DefaultAnalytics implements Analytics
+                        final readonly class PostgresAnalytics implements Analytics
                         {
-                            public function report(): Report
+                            public function buildReport(): Report
                             {
                                 // тяжёлые запросы
                                 sleep(10);
@@ -724,6 +725,10 @@
                                 return new Report(['data']);
                             }
                         }
+
+                        $report = new PostgresAnalytics()->buildReport(); // ожидание 10 секунд
+
+                        var_dump($report->data);
                     </code>
                 </pre>
             </div>
@@ -739,15 +744,15 @@
                                 private Analytics $analytics,
                             ) {}
 
-                            public function report(): Report
+                            public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyProxy(
-                                    $this->analytics->report(...)
+                                    $this->analytics->buildReport(...)
                                 );
                             }
                         }
 
-                        $report = new LazyAnalytics(new DefaultAnalytics())->report();
+                        $report = new LazyAnalytics(new PostgresAnalytics())->buildReport();
 
                         var_dump($report->data); // ожидание 10 секунд
                     </code>
@@ -761,7 +766,7 @@
                     <code class="language-php" data-trim data-line-numbers>
                         final class Analytics
                         {
-                            public function report(): Report
+                            public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyGhost(
                                     function (Report $report): void {
@@ -780,10 +785,10 @@
                                 private Analytics $analytics,
                             ) {}
 
-                            public function report(): Report
+                            public function buildReport(): Report
                             {
                                 return new ReflectionClass(Report::class)->newLazyProxy(
-                                    $this->analytics->report(...)
+                                    $this->analytics->buildReport(...)
                                 );
                             }
                         }
