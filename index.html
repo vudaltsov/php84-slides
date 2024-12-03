@@ -837,12 +837,12 @@
             <div style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
                 <pre style="font-size: 0.6em;">
                     <code class="language-php" data-trim data-line-numbers>
-                        // value: 3.341, scale: 6
+                        // value: 3.341, scale: 3
                         var_dump(
                             new Number('1.23') + new Number('2.111'),
                         );
 
-                        // value: 3.341000, scale: 10
+                        // value: 3.341000, scale: 6
                         var_dump(
                             new Number('1.23')->add(new Number('2.111'), scale: 6),
                         );
